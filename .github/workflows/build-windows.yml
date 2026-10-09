@@ -5,6 +5,7 @@ on:
     paths:
       - 'integrations/ets2-telemetry-plugin/**'
       - 'src/**'
+      - 'tests/**'
       - 'sheets/**'
       - '.github/workflows/build-windows.yml'
   workflow_dispatch:

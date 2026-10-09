@@ -27,6 +27,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Run Python tests
+        shell: pwsh
+        run: |
+          python -m unittest discover -s tests -v
+          python -m py_compile src/*.py
       - name: Build companion executable
         shell: pwsh
         run: |

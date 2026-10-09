@@ -1,31 +1,49 @@
-# Truck Racing Career — source-only prototype
+# Truck Racing Career
 
-**Status: source-only / not yet a playable ETS2–Assetto Corsa mashup.**
+**Status: integration prototype — not yet verified in the actual games.**
 
-A single-player career built around two real games:
-- **Primary: Euro Truck Simulator 2** — ordinary cargo deliveries, European roads and the player's own truck.
-- **Companion: Assetto Corsa** — actual installed cars, tracks and racing physics for career events.
+Truck Racing Career is a single-player career companion for **Euro Truck Simulator 2** and the original **Assetto Corsa**.
 
-The opening loop is: finish an ordinary ETS2 delivery → earn money and trucking reputation → unlock the first AC race → record race results and racing reputation → continue trucking to fund the racing career. Career state persists locally.
+## Intended player loop
 
-## Important integration boundary
+1. Launch ETS2 and complete an ordinary delivery.
+2. The native SCS telemetry plugin listens for ETS2's official `job.delivered` gameplay event and writes a local JSON event.
+3. The companion processes that event once, rewards trucking money/reputation, and unlocks racing events.
+4. Choose an installed AC car and track in the companion. It writes a single-player `race.ini`, launches `acs.exe`, and imports the session's `race_out.json` finishing order.
+5. Race rewards and reputation are saved locally.
 
-The current prototype implements and tests the career rules, save format and Assetto Corsa installation discovery. It does **not** yet receive live ETS2 delivery-completion events, launch Assetto Corsa through Melty, or install into either game. It must not be presented as playable or published yet. This environment cannot access the Windows game installations or Melty's API, and the Melty endpoint could not be resolved from this session.
+## Repository contents
 
-The intended ETS2 bridge is the official SCS Telemetry SDK; its events must be verified against a running ETS2 install before the career awards money. Assetto Corsa content must be enumerated from the player's own `content/cars` and `content/tracks` directories. No game assets are included.
+- `src/career.py`: persistent career rules, delivery rewards, race unlocks and race rewards.
+- `src/launcher.py`: Windows desktop companion, telemetry watcher, AC content discovery, race launch and result import.
+- `src/ets2_event_bridge.py`: command-line delivery-event consumer useful for diagnostics.
+- `integrations/ets2-telemetry-plugin/`: native Windows x64 SCS telemetry plugin source and CMake project.
+- `.github/workflows/build-windows.yml`: Windows CI workflow to download the official SCS SDK, build the plugin and package a companion executable.
 
-## Run the rules tests
+## Important: not a playable release yet
+
+Python rule/integration tests pass in the development environment, but **the native Windows build and both live-game integrations have not been verified here**. The workflow must build successfully, and the resulting ZIP must be installed and tested on a Windows PC with ETS2 and Assetto Corsa. Do not call this a verified one-click mod or publish it as ready until the DLL loads in ETS2, a real delivery unlocks a race, and a real AC race result is imported correctly.
+
+## Requirements for live testing
+
+- Windows 10/11 x64
+- Euro Truck Simulator 2 and original Assetto Corsa installed
+- Steam
+- At least one AC car and track installed
+
+No game assets are included. Cars and tracks are discovered from the player's own AC installation.
+
+## Local tests
 
 ```sh
 python -m unittest discover -s tests -v
+python -m py_compile src/*.py
 ```
 
-## Try the local career rules (development only)
+These tests do not replace live-game testing.
 
-```sh
-python src/career.py new --save career.json
-python src/career.py delivery --save career.json --job-id demo-001 --cargo "Machine parts" --revenue 1250 --distance-km 240
-python src/career.py status --save career.json
-```
+## Credits and license
 
-The delivery command is a development harness, not a live ETS2 integration.
+ETS2 telemetry API: [official SCS Telemetry SDK documentation](https://modding.scssoft.com/wiki/Documentation/Engine/SDK/Telemetry). The build workflow downloads the SDK from SCS; SDK headers are not bundled here. Assetto Corsa is developed by Kunos Simulazioni; the project does not redistribute game content.
+
+**Project license and remix permission are not yet decided.** Confirm them before public distribution.

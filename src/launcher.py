@@ -2,7 +2,8 @@
 import json, os, subprocess, threading, time, tkinter as tk
 from pathlib import Path
 from tkinter import ttk, filedialog, messagebox
-from career import RACE_EVENTS, complete_delivery, complete_race, load_state, save_state, fresh_state
+from career import RACE_EVENTS, complete_race, load_state, save_state, fresh_state
+from assetto_corsa import resolve_documents_root, run_race
 
 def data_dir():
     root=os.environ.get("LOCALAPPDATA") or os.environ.get("XDG_DATA_HOME") or str(Path.home()/".local"/"share")
@@ -32,42 +33,6 @@ def process_events():
                 save_state(SAVE,state); ARCHIVE.mkdir(parents=True,exist_ok=True); path.replace(ARCHIVE/path.name)
             except Exception as exc: print("Telemetry event left in inbox:",path.name,exc)
         time.sleep(.5)
-def ac_race(root,car,track,driver,laps=3,ai_count=7):
-    root=Path(root); exe=root/"acs.exe"
-    if not exe.is_file(): raise FileNotFoundError("acs.exe not found in selected folder")
-    cars,tracks=discover(root)
-    if car not in cars or track not in tracks: raise ValueError("Choose a car and track present in your AC installation")
-    docs=Path.home()/"Documents"/"Assetto Corsa"
-    if not docs.exists() and os.environ.get("USERPROFILE"): docs=Path(os.environ["USERPROFILE"])/"Documents"/"Assetto Corsa"
-    cfg=docs/"cfg"; out=docs/"out"/"race_out.json"; cfg.mkdir(parents=True,exist_ok=True); out.parent.mkdir(parents=True,exist_ok=True)
-    if out.exists(): out.unlink()
-    tf,_,layout=track.partition("/")
-    skinsdir=root/"content"/"cars"/car/"skins"; skins=sorted(p.name for p in skinsdir.iterdir() if p.is_dir()) if skinsdir.is_dir() else [""]
-    skin=skins[0] if skins else ""
-    lines=["[RACE]",f"TRACK={tf}",f"CONFIG_TRACK={layout}",f"MODEL={car}","MODEL_CONFIG=",f"SKIN={skin}","PENALTIES=1","FIXED_SETUP=0","DRIFT_MODE=0",f"RACE_LAPS={laps}",f"CARS={ai_count+1}","AI_LEVEL=80","JUMP_START_PENALTY=0","WEATHER_0=3_clear","","[DRIVE]",f"MODEL={car}",f"SKIN={skin}","MODEL_CONFIG=","AI_LEVEL=","AI_AGGRESSION=0","SETUP=","FIXED_SETUP=0","VIRTUAL_MIRROR=0",f"DRIVER_NAME={driver}","NATIONALITY=","","[HEADER]","VERSION=2","","[SESSION_0]","NAME=RACE","TYPE=3","SPAWN_SET=START",f"LAPS={laps}","DURATION_MINUTES=0","","[GROOVE]","VIRTUAL_LAPS=10","MAX_LAPS=30","STARTING_LAPS=0",""]
-    lines += ["[CAR_0]","SETUP=",f"SKIN={skin}","MODEL=-","MODEL_CONFIG=","BALLAST=0","RESTRICTOR=0",f"DRIVER_NAME={driver}","NATIONALITY=",""]
-    for i in range(1,ai_count+1):
-        lines += [f"[CAR_{i}]",f"MODEL={car}",f"SKIN={skins[i%len(skins)] if skins else ''}","MODEL_CONFIG=",f"DRIVER_NAME=Career AI {i:02d}","NATION_CODE=ITA","AI_LEVEL=80","AI_AGGRESSION=20","SETUP=","BALLAST=0","RESTRICTOR=0",""]
-    (cfg/"race.ini").write_text("\n".join(lines),encoding="utf-8")
-    lp=cfg/"launcher.ini"; old=lp.read_text(encoding="utf-8",errors="replace").splitlines() if lp.exists() else []
-    replacements={"DRIVE":"race","TRACK":tf}; seen=set(); patched=[]
-    for line in old:
-        key=line.split("=",1)[0].strip().upper() if "=" in line else ""
-        if key in replacements: patched.append(key+"="+replacements[key]); seen.add(key)
-        else: patched.append(line)
-    for key,val in replacements.items():
-        if key not in seen: patched.append(key+"="+val)
-    lp.write_text("\n".join(patched)+"\n",encoding="utf-8")
-    proc=subprocess.Popen([str(exe)],cwd=str(root)); proc.wait()
-    if not out.is_file(): return None
-    raw=json.loads(out.read_text(encoding="utf-8")); players=raw.get("players",[]); sessions=raw.get("sessions",[])
-    race=next((s for s in reversed(sessions) if s.get("type")==3 or str(s.get("name","")).upper()=="RACE"),None)
-    if not race:return None
-    order=race.get("raceResult") or []
-    for pos,index in enumerate(order,1):
-        if isinstance(index,int) and 0<=index<len(players) and str(players[index].get("name","")).casefold()==driver.casefold():
-            return {"position":pos,"finishers":len(order)}
-    return None
 class App:
  def __init__(self,root):
     self.root=root; root.title("Truck Racing Career"); root.geometry("740x520")
@@ -114,8 +79,8 @@ class App:
         event_id=self.event.get().split(" — ",1)[0];s=load_state(SAVE);event=next(e for e in RACE_EVENTS if e["id"]==event_id)
         if s["money_eur"]<event["entry_fee_eur"]:raise ValueError("Not enough career money for the entry fee")
         self.status.set("Assetto Corsa is running. Finish the race to import your result.");self.root.update_idletasks()
-        result=ac_race(self.ac.get(),self.car.get(),self.track.get(),self.driver.get())
-        if not result:raise ValueError("No verified player finishing position in race_out.json; no reward recorded.")
+        result=run_race(game_root=Path(self.ac.get()),documents_root=resolve_documents_root(),car=self.car.get(),track=self.track.get(),driver_name=self.driver.get(),laps=3,ai_count=7,wait=True)
+        if not result.get("completed"):raise ValueError(result.get("reason","No verified player finishing position in race_out.json; no reward recorded."))
         prize=max(0,(result["finishers"]-result["position"]+1)*100)
         award=complete_race(s,event_id=event_id,finish_position=result["position"],finishers=result["finishers"],prize_eur=prize);save_state(SAVE,s)
         self.status.set(f"Race recorded: P{result['position']}/{result['finishers']}. Prize €{prize}; racing reputation +{award}.")

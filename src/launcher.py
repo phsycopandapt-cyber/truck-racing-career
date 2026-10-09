@@ -2,7 +2,7 @@
 import json, os, subprocess, threading, time, tkinter as tk
 from pathlib import Path
 from tkinter import ttk, filedialog, messagebox
-from career import RACE_EVENTS, complete_race, load_state, save_state, fresh_state
+from career import RACE_EVENTS, complete_delivery, complete_race, load_state, save_state, fresh_state
 from assetto_corsa import resolve_documents_root, run_race
 
 def data_dir():

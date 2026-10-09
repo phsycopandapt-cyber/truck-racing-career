@@ -1,0 +1,12 @@
+{
+  "sheet": "career_systems",
+  "version": 1,
+  "systems": [
+    {"id":"save_state","fields":{"schema_version":"integer","money_eur":"number","trucking_reputation":"integer","racing_reputation":"integer","completed_deliveries":"integer","completed_races":"integer","processed_job_ids":"string[]","unlocked_events":"string[]"},"source":"src/career.py","status":"implemented_and_tested"},
+    {"id":"delivery_reward","fields":{"job_id":"string","cargo":"string","revenue_eur":"number","distance_km":"number","reputation_award":"integer"},"source":"src/career.py","status":"rules_implemented_live_telemetry_unverified"},
+    {"id":"first_race_unlock","fields":{"event_id":"string","required_deliveries":"integer","minimum_trucking_reputation":"integer","entry_fee_eur":"number"},"source":"sheets/race_events.json","status":"implemented_and_tested"},
+    {"id":"race_result","fields":{"event_id":"string","finish_position":"integer","finishers":"integer","prize_eur":"number","racing_reputation_award":"integer"},"source":"src/career.py","status":"implemented_and_tested_simulated_result_only"},
+    {"id":"ets2_telemetry_bridge","fields":{"sdk":"SCS Telemetry SDK","event":"verified delivery completion","transport":"local event file or IPC"},"source":"docs/integration-notes.md","status":"not_implemented"},
+    {"id":"assetto_corsa_discovery","fields":{"cars_path":"player installation content/cars","tracks_path":"player installation content/tracks"},"source":"src/career.py","status":"implemented_and_tested_with_fixture"}
+  ]
+}

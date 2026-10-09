@@ -1,0 +1,7 @@
+{
+  "sheet": "race_events",
+  "events": [
+    {"id":"club_sprint_01","name":"Club Sprint — First Seat","required_deliveries":1,"minimum_trucking_reputation":1,"entry_fee_eur":150,"discipline":"circuit_sprint","assetto_corsa_car_source":"player_installed_content_cars","assetto_corsa_track_source":"player_installed_content_tracks","status":"career_rule_ready_actual_event_launch_not_implemented"},
+    {"id":"club_sprint_02","name":"Club Sprint — Rising Driver","required_deliveries":3,"minimum_trucking_reputation":10,"entry_fee_eur":300,"discipline":"circuit_sprint","assetto_corsa_car_source":"player_installed_content_cars","assetto_corsa_track_source":"player_installed_content_tracks","status":"career_rule_ready_actual_event_launch_not_implemented"}
+  ]
+}

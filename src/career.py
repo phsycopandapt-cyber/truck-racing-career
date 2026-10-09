@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Rules prototype for Truck Racing Career; not yet connected to live game telemetry."""
 from __future__ import annotations
-import argparse, json
+import argparse, json, sys
 from pathlib import Path
 
 SCHEMA_VERSION = 1
-RACE_EVENTS = json.loads((Path(__file__).resolve().parents[1] / "sheets" / "race_events.json").read_text(encoding="utf-8"))["events"]
+BASE_DIR = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[1]))
+RACE_EVENTS = json.loads((BASE_DIR / "sheets" / "race_events.json").read_text(encoding="utf-8"))["events"]
 
 
 def fresh_state():

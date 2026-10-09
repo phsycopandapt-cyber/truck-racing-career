@@ -4,7 +4,11 @@
 #include <fstream>
 #include <string>
 #include <cstring>
+#define scs_telemetry_init scs_telemetry_init_sdk_declaration
+#define scs_telemetry_shutdown scs_telemetry_shutdown_sdk_declaration
 #include <scssdk_telemetry.h>
+#undef scs_telemetry_init
+#undef scs_telemetry_shutdown
 #include <common/scssdk_telemetry_common_configs.h>
 #include <common/scssdk_telemetry_common_gameplay_events.h>
 

@@ -39,7 +39,7 @@ Requirements: Windows 10/11 x64, Steam, ETS2 and the original Assetto Corsa (not
 - `integrations/ets2-telemetry-plugin/`: native ETS2 telemetry DLL source.
 - `.github/workflows/build-windows.yml`: Windows build and artifact packaging.
 
-The automated tests exercise career logic and integration helpers; they do not substitute for testing with ETS2 and Assetto Corsa actually running. The Windows CI build must pass before the ZIP artifact is considered installable, and the first real delivery/race still needs to be verified on a PC with both games installed.
+The automated tests exercise career logic and integration helpers; they do not substitute for testing with ETS2 and Assetto Corsa actually running. The Windows x64 CI build has now succeeded: the companion EXE and native ETS2 telemetry DLL were compiled, packaged, and uploaded as the `TruckRacingCareer-Windows-x64` artifact. Ten automated tests passed in that Windows build. The package has been structurally checked, including the required ETS2 telemetry exports. The first real delivery/race still needs to be verified on a PC with both games installed.
 
 ## Third-party software and licensing
 

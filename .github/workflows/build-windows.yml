@@ -31,7 +31,7 @@ jobs:
         shell: pwsh
         run: |
           python -m unittest discover -s tests -v
-          python -m py_compile src/*.py
+          Get-ChildItem src -Filter '*.py' | ForEach-Object { python -m py_compile $_.FullName; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }
       - name: Build companion executable
         shell: pwsh
         run: |

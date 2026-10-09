@@ -72,6 +72,7 @@ void callback(const scs_event_t event,const void* info,const scs_context_t) {
   } catch(...) {}
 }
 }
+extern "C" {
 __declspec(dllexport) SCSAPI_RESULT scs_telemetry_init(const scs_u32_t version,const scs_telemetry_init_params_t* const params) {
   if(version!=SCS_TELEMETRY_VERSION_1_01)return SCS_RESULT_unsupported;
   if(!params)return SCS_RESULT_invalid_parameter;
@@ -87,4 +88,5 @@ __declspec(dllexport) SCSAPI_RESULT scs_telemetry_init(const scs_u32_t version,c
 }
 __declspec(dllexport) SCSAPI_VOID scs_telemetry_shutdown(void) {
   if(unregister_event){unregister_event(SCS_TELEMETRY_EVENT_configuration);unregister_event(SCS_TELEMETRY_EVENT_gameplay);}
+}
 }

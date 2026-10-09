@@ -6,6 +6,7 @@ on:
       - 'integrations/ets2-telemetry-plugin/**'
       - 'src/**'
       - 'tests/**'
+      - 'install.ps1'
       - 'sheets/**'
       - '.github/workflows/build-windows.yml'
   workflow_dispatch:
@@ -50,6 +51,7 @@ jobs:
           Copy-Item dist/TruckRacingCareer.exe package/TruckRacingCareer.exe
           Copy-Item build/Release/TruckRacingCareer.dll package/bin/win_x64/plugins/TruckRacingCareer.dll
           Copy-Item README.md package/README.md
+          Copy-Item install.ps1 package/install.ps1
           Copy-Item docs/integration-notes.md package/INTEGRATION.md
           Compress-Archive -Path package/* -DestinationPath TruckRacingCareer-Windows-x64.zip -Force
       - uses: actions/upload-artifact@v4
